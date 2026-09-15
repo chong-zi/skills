@@ -1,0 +1,13 @@
+{
+  "name": "chong-zi-skills",
+  "owner": {
+    "name": "chong-zi"
+  },
+  "plugins": [
+    {
+      "name": "chong-zi-skills",
+      "source": "./",
+      "description": "个人维护的通用 Claude/Agent Skills 集合"
+    }
+  ]
+}

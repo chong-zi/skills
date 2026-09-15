@@ -1,6 +1,8 @@
 ---
 name: template-skill
 description: 新 skill 模板。复制本目录到 skills/<新名>/ 后填写 name、description 和正文。
+metadata:
+  internal: true
 ---
 
 # <Skill 名称>

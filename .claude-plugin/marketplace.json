@@ -3,11 +3,29 @@
   "owner": {
     "name": "chong-zi"
   },
+  "metadata": {
+    "description": "个人维护的通用 Claude/Agent Skills 集合",
+    "version": "1.0.0"
+  },
   "plugins": [
     {
       "name": "chong-zi-skills",
+      "description": "通用 skill 集合：概念分析、知识库初始化、服务器档案、PDF 转换、PPT 串词、产品调研等",
       "source": "./",
-      "description": "个人维护的通用 Claude/Agent Skills 集合"
+      "strict": false,
+      "skills": [
+        "./skills/concept-analyst",
+        "./skills/init-kb",
+        "./skills/mac-app-scan",
+        "./skills/mcp-note",
+        "./skills/mistral-pdf-to-markdown",
+        "./skills/ppt-presenter-script",
+        "./skills/product-research",
+        "./skills/proposal-iteration",
+        "./skills/server-profile",
+        "./skills/skill-wiki",
+        "./skills/univer-excel-filler"
+      ]
     }
   ]
 }

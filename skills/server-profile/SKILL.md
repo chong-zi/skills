@@ -10,15 +10,17 @@ platforms: [macos, linux]
 
 # server-profile
 
-采集服务器信息并整理成标准化档案（含基底 + GPU 专题两块结构）。
+采集服务器信息并整理成标准化档案（含基底 + GPU 专题两块结构），并登记到采集索引。
 
-> ⚠️ **安全提示**：档案含敏感信息（IP / 用户 / sudoers / 最近登录 / 序列号），且 vault 由 obsidian-git 自动提交。若采集的是客户机或敏感机，请输出到 **vault 外目录**，或手动脱敏（密码 / sudoers / last）。后续会支持 `--redact` 自动打码（v2）。
+> ⚠️ **安全提示**：档案含敏感信息（IP / 用户 / sudoers / 最近登录 / 序列号），可能被 git / 同步工具自动归档。若采集的是客户机或敏感机，请输出到**不受版本控制/同步的目录**，或手动脱敏（密码 / sudoers / last）。后续会支持 `--redact` 自动打码（v2）。
 
 ## 资产位置
 
-- 采集脚本：`src/server-profile/collect.sh`（零依赖 bash，全 sudo）
-- 采集清单：`src/server-profile/collect-spec.md`（标签 = 章节映射 key）
-- 模板：`src/server-profile/templates/{base.md, gpu.md}`
+> 以下均为**本 skill 根目录**（即安装后 `server-profile/` 本身）下的文件；agent 调用本 skill 时以该根目录为基准定位，无 `src/` 包装层。
+
+- 采集脚本：`collect.sh`（零依赖 bash，全 sudo）
+- 采集清单：`collect-spec.md`（标签 = 章节映射 key）
+- 模板：`templates/{base.md, gpu.md, index.md}`（base/gpu = 档案文档；index = 索引文件骨架）
 - 参考：任意一份已整理的服务器档案（输出格式以模板为准）
 
 ## 输入路由（判断用户给的是什么）
@@ -40,7 +42,34 @@ platforms: [macos, linux]
    - 一句话定位 + 定位依据（按显存/CPU/互连推断用途）
    - 各章结论句（如「机器整体空闲，可立即使用」）
    - GPU 互连拓扑结论 + 带宽表（若有 GPU）
-4. **输出**：写到 `{输出目录}/{别名}-{用途}.md`（输出目录由用户指定，未提供则询问是否用当前目录）；索引页默认追加到「研发服务器清单.md」——用户可指定别的索引页路径，或明确说「不要追加索引」
+4. **输出**：写到 `{输出目录}/{别名}-{用途}.md`（输出目录由用户指定，未提供则询问是否用当前目录）
+5. **登记索引**（默认开启）：在采集索引中追加一行 `别名 | 机器定位/配置摘要 | 档案绝对路径`。索引文件位置按下面「索引定位」规则解析（先读注册表，未指定则用默认位置）。可明确说「不要登记索引」。
+
+### 索引定位
+
+索引文件只存**导航索引**（别名 + 摘要 + 档案绝对路径），不放档案正文。**新建索引文件时，先照 `templates/index.md` 骨架生成**，再往里追加条目。位置解析顺序：
+
+1. 读注册表 `~/.skills/server-profile/config.json`，取 `index_path`（用户此前指定的索引文件绝对路径）；
+2. 若注册表不存在或无 `index_path`，用默认索引 `~/.skills/server-profile/index.md`；
+3. **首次登记时**，引导用户指定索引文件路径（若用户跳过，则用默认位置）。用户指定后写回 `config.json`，此后所有采集都默认追加到该索引。
+
+### 配置（config.json）
+
+注册表文件 `~/.skills/server-profile/config.json` 记录「用户偏好的索引文件路径」，由技能读写，也可由用户手动产生：
+
+```json
+{
+  "index_path": "/绝对/路径/到/你的索引文件.md"
+}
+```
+
+三种产生途径：
+
+| 场景 | 做法 |
+|---|---|
+| **跟 agent 对话使用**（推荐） | 首次登记时 agent 会问「用哪个索引文件」，回答路径即可，agent 自动生成/更新 `config.json` |
+| **想提前预设** | 手动新建 `~/.skills/server-profile/config.json`，填入上面 JSON |
+| **不用索引分流** | 不建 `config.json`，技能自动 fallback 到默认索引 `~/.skills/server-profile/index.md` |
 
 ## 更新模式
 
@@ -93,3 +122,6 @@ platforms: [macos, linux]
 - 命令 FAILED 段（标签下出现 `FAILED:`）→ 档案对应字段标「采集失败」或按实际输出描述
 - ssh 连接失败 → 建议「改用脚本模式：把 collect.sh 拷到目标机 sudo bash 跑，输出粘回」
 - sudo 非交互失败 → 建议「目标机配 NOPASSWD，或走脚本模式」
+- 序列号为占位值（如 `0123456789`）→ 部分主板未写入真实 SN，档案标注「占位值，主板未写」
+- `安全-最近登录` 输出「均无登录记录」→ wtmp 为空（被清理或新装机），档案如实标注「wtmp 空，无历史登录」
+- GPU 全量附录 `/tmp/nvidia-smi-q.txt` 为 root 属主 → 目标机清理需 sudo；档案注明附录位置即可，不必回传

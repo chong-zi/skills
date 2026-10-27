@@ -38,6 +38,7 @@ npx skills add chong-zi/skills
 | `proposal-iteration` | 假设-验证循环式目标达成 |
 | `server-profile` | 采集服务器信息，整理标准化档案（基底 + GPU 专题） |
 | `skill-wiki` | 扫描已安装 skill，生成/更新 Obsidian wiki |
+| `spool` | 通过 spool CLI 分享/撤回 AI 会话到 Spool hub，并在任意 agent 内召回本地全部 AI 历史会话 |
 | `univer-excel-filler` | 填充 Univer 格式 Excel 文档（.univer.md） |
 
 ## 目录结构
